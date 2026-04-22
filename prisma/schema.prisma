@@ -1,0 +1,1316 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PartnerType {
+  NGO
+  CORPORATE
+  FOUNDATION
+  GOVERNMENT
+}
+
+enum OrganizationType {
+  CORPORATE
+  NGO
+  FOUNDATION
+  GOVERNMENT
+  ALUMNI
+  ASSOCIATION
+  COMMUNITY
+  FAITH_BASED
+  OTHER
+}
+
+enum OrganizationStatus {
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum OrganizationMembershipRole {
+  ADMIN
+  COORDINATOR
+  MEMBER
+  SUPPORT_LEAD
+  VIEWER
+}
+
+enum OrganizationMembershipStatus {
+  INVITED
+  PENDING
+  ACTIVE
+  SUSPENDED
+  LEFT
+}
+
+enum SchoolType {
+  PRIMARY
+  SECONDARY
+  COLLEGE
+  UNIVERSITY
+  VOCATIONAL
+}
+
+enum SocioEconomicTier {
+  LOW
+  LOWER_MIDDLE
+  MIDDLE
+  UPPER_MIDDLE
+  HIGH
+}
+
+enum UserRole {
+  MENTOR
+  MENTEE
+  SCHOOL_ADMIN
+  PLATFORM_ADMIN
+  GUARDIAN
+  PARTNER_ADMIN
+  ORGANIZATION_ADMIN
+}
+
+enum EducationLevel {
+  PRIMARY
+  SECONDARY
+  COLLEGE
+  UNIVERSITY
+  VOCATIONAL
+}
+
+enum EnrollmentStatus {
+  FULL_TIME
+  PART_TIME
+}
+
+enum MentorBackgroundCheckStatus {
+  PENDING
+  CLEARED
+  FAILED
+  EXPIRED
+}
+
+enum MentorProfileStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  INACTIVE
+}
+
+enum MentorOnboardingStage {
+  SIGNUP
+  EMAIL_VERIFIED
+  PROFILE_CREATED
+  INTERESTS_SELECTED
+  TRAINING_COMPLETED
+  CONSENT_SIGNED
+  BACKGROUND_CHECK_PENDING
+  APPROVED
+  PROGRAM_ELIGIBLE
+  MATCHING
+  ACTIVE
+  ALUMNI
+}
+
+enum MentorReadinessState {
+  PENDING_REGISTRATION
+  PENDING_BACKGROUND_CHECK
+  PENDING_TRAINING
+  PENDING_ADMIN_REVIEW
+  MATCHABLE
+  ASSIGNED
+  ACTIVE
+  PAUSED
+  INACTIVE
+}
+
+enum MentorProgramApplicationStatus {
+  PENDING
+  APPROVED
+  WAITLISTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum MenteeProfileStatus {
+  ACTIVE
+  WAITING
+  MATCHED
+  INACTIVE
+}
+
+enum MenteeIntakeStage {
+  CONSENT_REQUIRED
+  AWAITING_MATCHING
+  MATCHED
+  ACTIVE
+  INACTIVE
+}
+
+enum MentorshipStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  TERMINATED
+}
+
+enum CheckInFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum MatchDeclineCategory {
+  AVAILABILITY
+  FORMAT
+  FIT
+  CONTEXT
+  OTHER
+}
+
+enum MentorshipOutcome {
+  SUCCESSFUL
+  PARTIAL
+  UNSUCCESSFUL
+}
+
+enum SessionFormat {
+  ONLINE
+  IN_PERSON
+  PHONE
+}
+
+enum MentoringFormat {
+  ONLINE
+  IN_PERSON
+  HYBRID
+}
+
+enum SessionAttendanceStatus {
+  SCHEDULED
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  ACHIEVED
+  ABANDONED
+}
+
+enum FeedbackType {
+  MID_TERM
+  END_TERM
+  MONTHLY
+}
+
+enum ConsentType {
+  DATA_PROCESSING
+  PHOTO_RELEASE
+  MENTORSHIP_AGREEMENT
+  SAFEGUARDING
+}
+
+enum GrantOpportunityStatus {
+  DISCOVERED
+  QUALIFYING
+  PURSUING
+  ARCHIVED
+}
+
+enum GrantFunderType {
+  FOUNDATION
+  GOVERNMENT
+  CORPORATE
+  NGO
+  MULTILATERAL
+  OTHER
+}
+
+enum GrantSourceType {
+  TEAM
+  BOARD
+  WEBSITE
+  LINKEDIN
+  EMAIL
+  REFERRAL
+  OTHER
+}
+
+enum GrantApplicationStage {
+  DISCOVERY
+  APPROVAL
+  WRITING
+  SUBMISSION
+  SUBMITTED
+  CLOSED
+}
+
+enum GrantTaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum GrantTaskReviewStatus {
+  PENDING
+  APPROVED
+  REWORK_REQUIRED
+}
+
+enum GrantApprovalType {
+  PURSUE
+  BUDGET
+  FINAL_SUBMISSION
+}
+
+enum GrantApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Partner {
+  id                   String   @id @default(uuid()) @db.Uuid
+  name                 String
+  type                 PartnerType
+  contactPerson        String   @map("contact_person")
+  contactEmail         String   @map("contact_email")
+  contactPhone         String?  @map("contact_phone")
+  partnershipAgreement Json?    @map("partnership_agreement")
+  logoUrl              String?  @map("logo_url")
+  website              String?
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  schools School[]
+  users   User[]
+  organizations Organization[]
+  grantOpportunities GrantOpportunity[]
+  grantApplications  GrantApplication[]
+
+  @@index([name])
+  @@index([type])
+  @@map("partners")
+}
+
+model Organization {
+  id                   String             @id @default(uuid()) @db.Uuid
+  partnerId            String?            @map("partner_id") @db.Uuid
+  name                 String
+  slug                 String             @unique
+  type                 OrganizationType
+  status               OrganizationStatus @default(PENDING_REVIEW)
+  registrationNumber   String?            @map("registration_number")
+  website              String?
+  logoUrl              String?            @map("logo_url")
+  description          String?            @db.Text
+  mission              String?            @db.Text
+  country              String
+  county               String?
+  city                 String?
+  address              String?            @db.Text
+  contactEmail         String             @map("contact_email")
+  contactPhone         String?            @map("contact_phone")
+  primaryContactName   String             @map("primary_contact_name")
+  primaryContactTitle  String?            @map("primary_contact_title")
+  adminFirstName       String             @map("admin_first_name")
+  adminLastName        String             @map("admin_last_name")
+  adminEmail           String             @map("admin_email")
+  adminPhone           String             @map("admin_phone")
+  adminTitle           String?            @map("admin_title")
+  mentorParticipation  Boolean            @default(true) @map("mentor_participation")
+  financialSupport     Boolean            @default(false) @map("financial_support")
+  inKindSupport        Boolean            @default(false) @map("in_kind_support")
+  schoolsOfInterest    Json?              @map("schools_of_interest")
+  publicProfileEnabled Boolean            @default(false) @map("public_profile_enabled")
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  partner     Partner?                  @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  memberships OrganizationMembership[]
+  agreements  OrganizationAgreement[]
+
+  @@index([partnerId])
+  @@index([status])
+  @@index([name])
+  @@index([adminEmail])
+  @@map("organizations")
+}
+
+model PlatformBranding {
+  id                String   @id @default("default")
+  platformName      String   @default("Cacumator Mentorship Platform") @map("platform_name")
+  logoUrl           String?  @map("logo_url")
+  ceoName           String   @default("Grace Munyiri") @map("ceo_name")
+  ceoTitle          String   @default("Chief Executive Officer") @map("ceo_title")
+  ceoWelcomeMessage String   @default("Welcome to the Cacumator Mentorship Platform. We built this platform to create a safe, structured, and accountable path for mentors, organizations, and supporters to help young people thrive.") @map("ceo_welcome_message") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("platform_branding")
+}
+
+model VerificationSettings {
+  id                  String   @id @default("default")
+  autoReminderEnabled Boolean  @default(false) @map("auto_reminder_enabled")
+  resendIntervalHours Int      @default(24) @map("resend_interval_hours")
+  maxReminders        Int      @default(3) @map("max_reminders")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("verification_settings")
+}
+
+model MatchingSettings {
+  id                           String   @id @default("default")
+  interestsWeight              Int      @default(30) @map("interests_weight")
+  contextWeight                Int      @default(20) @map("context_weight")
+  availabilityWeight           Int      @default(20) @map("availability_weight")
+  formatWeight                 Int      @default(15) @map("format_weight")
+  capacityWeight               Int      @default(15) @map("capacity_weight")
+  penalizeNearCapacity         Boolean  @default(true) @map("penalize_near_capacity")
+  nearCapacityPenalty          Int      @default(8) @map("near_capacity_penalty")
+  penalizeLowAvailability      Boolean  @default(true) @map("penalize_low_availability")
+  lowAvailabilityPenalty       Int      @default(6) @map("low_availability_penalty")
+  penalizeWeakContext          Boolean  @default(true) @map("penalize_weak_context")
+  weakContextPenalty           Int      @default(4) @map("weak_context_penalty")
+  penalizePriorDecline         Boolean  @default(true) @map("penalize_prior_decline")
+  priorDeclinePenalty          Int      @default(12) @map("prior_decline_penalty")
+  excludePriorDeclinedPair     Boolean  @default(false) @map("exclude_prior_declined_pair")
+  maxOpenMentorshipsPerMentee  Int      @default(3) @map("max_open_mentorships_per_mentee")
+  availabilityDeclinePenalty   Int      @default(10) @map("availability_decline_penalty")
+  formatDeclinePenalty         Int      @default(9) @map("format_decline_penalty")
+  fitDeclinePenalty            Int      @default(8) @map("fit_decline_penalty")
+  contextDeclinePenalty        Int      @default(7) @map("context_decline_penalty")
+  otherDeclinePenalty          Int      @default(6) @map("other_decline_penalty")
+  createdAt                    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("matching_settings")
+}
+
+model ConsentNotificationSettings {
+  id                            String   @id @default("default")
+  notifyPlatformAdminsOnDecline Boolean  @default(false) @map("notify_platform_admins_on_decline")
+  createdAt                     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("consent_notification_settings")
+}
+
+model MentorTrainingModuleSetting {
+  id               String   @id @default(uuid()) @db.Uuid
+  title            String
+  description      String   @db.Text
+  moduleBody       String   @default("") @map("module_body") @db.Text
+  version          String
+  required         Boolean  @default(true)
+  passingScore     Int      @default(100) @map("passing_score")
+  maxAttempts      Int?     @map("max_attempts")
+  estimatedMinutes Int?     @map("estimated_minutes")
+  sortOrder        Int      @default(0) @map("sort_order")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  completions MentorTrainingCompletion[]
+  questions   MentorTrainingQuestion[]
+  attempts    MentorTrainingAttempt[]
+
+  @@index([isActive, sortOrder])
+  @@map("mentor_training_module_settings")
+}
+
+model MentorTrainingQuestion {
+  id             String                     @id @default(uuid()) @db.Uuid
+  moduleId       String                     @map("module_id") @db.Uuid
+  prompt         String                     @db.Text
+  explanation    String?                    @db.Text
+  questionType   MentorTrainingQuestionType @default(SINGLE_CHOICE) @map("question_type")
+  options        Json
+  correctAnswer  String                     @map("correct_answer")
+  correctAnswers Json                       @default("[]") @map("correct_answers")
+  imageUrl       String?                    @map("image_url")
+  sortOrder      Int                        @default(0) @map("sort_order")
+  isActive       Boolean                    @default(true) @map("is_active")
+  createdAt      DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  module MentorTrainingModuleSetting @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId, isActive, sortOrder])
+  @@map("mentor_training_questions")
+}
+
+enum MentorTrainingQuestionType {
+  SINGLE_CHOICE
+  MULTI_CHOICE
+}
+
+model MentorTrainingAttempt {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  moduleId         String   @map("module_id") @db.Uuid
+  score            Int
+  passed           Boolean
+  acknowledgedName String   @map("acknowledged_name")
+  answers          Json
+  submittedAt      DateTime @map("submitted_at") @db.Timestamptz(6)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user   User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module MentorTrainingModuleSetting @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId, submittedAt])
+  @@index([userId, moduleId, submittedAt])
+  @@map("mentor_training_attempts")
+}
+
+model MentorTrainingCompletion {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  moduleId         String   @map("module_id") @db.Uuid
+  acknowledgedName String   @map("acknowledged_name")
+  completedAt      DateTime @map("completed_at") @db.Timestamptz(6)
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user   User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module MentorTrainingModuleSetting @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+  @@index([moduleId, completedAt])
+  @@index([userId, completedAt])
+  @@map("mentor_training_completions")
+}
+
+model MentorConsentSetting {
+  id          String      @id @default(uuid()) @db.Uuid
+  title       String
+  consentType ConsentType @map("consent_type")
+  version     String
+  summary     String      @db.Text
+  documentBody String     @default("") @map("document_body") @db.Text
+  documentUrl String      @map("document_url")
+  required    Boolean     @default(true)
+  sortOrder   Int         @default(0) @map("sort_order")
+  isActive    Boolean     @default(true) @map("is_active")
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive, sortOrder])
+  @@index([consentType, isActive])
+  @@map("mentor_consent_settings")
+}
+
+model School {
+  id                  String            @id @default(uuid()) @db.Uuid
+  partnerId           String?           @map("partner_id") @db.Uuid
+  name                String
+  type                SchoolType
+  address             String            @db.Text
+  phone               String
+  email               String
+  principalName       String            @map("principal_name")
+  principalEmail      String            @map("principal_email")
+  studentPopulation   Int?              @map("student_population")
+  socioEconomicTier   SocioEconomicTier? @map("socio_economic_tier")
+  programsOffered     Json?             @map("programs_offered")
+  accreditationStatus String?           @map("accreditation_status")
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  partner        Partner?        @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  users          User[]
+  menteeProfiles MenteeProfile[]
+  programs       Program[]
+  grantOpportunities GrantOpportunity[]
+  grantApplications  GrantApplication[]
+
+  @@index([partnerId])
+  @@index([type])
+  @@index([name])
+  @@map("schools")
+}
+
+model User {
+  id               String   @id @default(uuid()) @db.Uuid
+  email            String   @unique
+  password         String
+  firstName        String   @map("first_name")
+  middleName       String?  @map("middle_name")
+  lastName         String   @map("last_name")
+  phone            String
+  dateOfBirth      DateTime @map("date_of_birth") @db.Date
+  role             UserRole
+  schoolId         String?  @map("school_id") @db.Uuid
+  partnerId        String?  @map("partner_id") @db.Uuid
+  timeZone         String?  @map("time_zone")
+  profilePhoto     String?  @map("profile_photo")
+  emailVerifiedAt  DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  twoFactorEnabled Boolean  @default(false) @map("two_factor_enabled")
+  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz(6)
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  school                  School?         @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  partner                 Partner?        @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  mentorProfile           MentorProfile?
+  menteeProfile           MenteeProfile?
+  approvedMentorProfiles  MentorProfile[] @relation("MentorApprovedBy")
+  mentorshipsAsMentor     Mentorship[]    @relation("MentorshipMentor")
+  mentorshipsAsMentee     Mentorship[]    @relation("MentorshipMentee")
+  declinedMentorshipAcceptances MentorshipAcceptance[] @relation("MentorshipDeclinedBy")
+  sessionsCreated         Session[]       @relation("SessionCreatedBy")
+  feedbackGiven           Feedback[]      @relation("FeedbackFromUser")
+  feedbackReceived        Feedback[]      @relation("FeedbackToUser")
+  consents                Consent[]
+  auditLogs               AuditLog[]
+  guardianForMentees      MenteeProfile[] @relation("GuardianUser")
+  createdGrantOpportunities GrantOpportunity[] @relation("GrantOpportunityCreatedBy")
+  scoredGrantOpportunities  GrantOpportunity[] @relation("GrantOpportunityScoredBy")
+  createdGrantApplications  GrantApplication[] @relation("GrantApplicationCreatedBy")
+  submittedGrantApplications GrantApplication[] @relation("GrantApplicationSubmittedBy")
+  createdGrantTasks       GrantTask[]     @relation("GrantTaskCreatedBy")
+  assignedGrantTasks      GrantTask[]     @relation("GrantTaskAssignee")
+  reviewedGrantTasks      GrantTask[]     @relation("GrantTaskReviewedBy")
+  requestedGrantApprovals GrantApproval[] @relation("GrantApprovalRequestedBy")
+  resolvedGrantApprovals  GrantApproval[] @relation("GrantApprovalResolvedBy")
+  grantSubmissions        GrantSubmission[] @relation("GrantSubmissionSubmittedBy")
+  tenantInvite            TenantUserInvite? @relation("TenantInviteUser")
+  sentTenantInvites       TenantUserInvite[] @relation("TenantInviteSender")
+  mentorOnboarding        MentorOnboarding?
+  mentorProgramApplications MentorProgramApplication[] @relation("MentorProgramApplications")
+  reviewedMentorProgramApplications MentorProgramApplication[] @relation("MentorProgramApplicationReviewedBy")
+  organizationMemberships OrganizationMembership[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens    PasswordResetToken[]
+  mentorTrainingCompletions MentorTrainingCompletion[]
+  mentorTrainingAttempts MentorTrainingAttempt[]
+
+  @@index([role])
+  @@index([schoolId])
+  @@index([partnerId])
+  @@index([isActive])
+  @@map("users")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  email     String
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  verifiedAt DateTime? @map("verified_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId, expiresAt, verifiedAt])
+  @@map("email_verification_tokens")
+}
+
+model PasswordResetToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  email      String
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt     DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId, expiresAt, usedAt])
+  @@map("password_reset_tokens")
+}
+
+model OrganizationMembership {
+  id             String                       @id @default(uuid()) @db.Uuid
+  organizationId String                       @map("organization_id") @db.Uuid
+  userId         String                       @map("user_id") @db.Uuid
+  role           OrganizationMembershipRole   @default(MEMBER)
+  status         OrganizationMembershipStatus @default(PENDING)
+  title          String?
+  department     String?
+  createdAt      DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, status])
+  @@index([userId, status])
+  @@map("organization_memberships")
+}
+
+model OrganizationAgreement {
+  id            String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  code          String
+  title         String
+  version       String
+  agreedByName  String   @map("agreed_by_name")
+  agreedByEmail String   @map("agreed_by_email")
+  documentBody  String?  @map("document_body") @db.Text
+  documentUrl   String?  @map("document_url")
+  agreedAt      DateTime @map("agreed_at") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, code])
+  @@map("organization_agreements")
+}
+
+model TenantUserInvite {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  email       String
+  tokenHash   String   @unique @map("token_hash")
+  invitedById String   @map("invited_by_id") @db.Uuid
+  invitedAt   DateTime @default(now()) @map("invited_at") @db.Timestamptz(6)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(6)
+  acceptedAt  DateTime? @map("accepted_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user      User @relation("TenantInviteUser", fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy User @relation("TenantInviteSender", fields: [invitedById], references: [id], onDelete: Restrict)
+
+  @@index([email])
+  @@index([invitedById, invitedAt])
+  @@index([expiresAt, acceptedAt])
+  @@map("tenant_user_invites")
+}
+
+model MentorProfile {
+  id                      String                      @id @default(uuid()) @db.Uuid
+  userId                  String                      @unique @map("user_id") @db.Uuid
+  profession              String
+  employer                String
+  jobTitle                String                      @map("job_title")
+  industry                String
+  yearsExperience         Int                         @map("years_experience")
+  expertiseAreas          Json                        @map("expertise_areas")
+  mentoringFormats        Json                        @map("mentoring_formats")
+  maxMentees              Int                         @default(5) @map("max_mentees")
+  currentMentees          Int                         @default(0) @map("current_mentees")
+  availability            Json
+  hoursPerMonth           Int                         @map("hours_per_month")
+  motivation              String                      @db.Text
+  backgroundCheckStatus   MentorBackgroundCheckStatus @map("background_check_status")
+  backgroundCheckDate     DateTime?                   @map("background_check_date") @db.Date
+  backgroundCheckExpiry   DateTime?                   @map("background_check_expiry") @db.Date
+  backgroundCheckDocument String?                     @map("background_check_document")
+  trainingCompleted       Boolean                     @default(false) @map("training_completed")
+  trainingCompletedDate   DateTime?                   @map("training_completed_date") @db.Date
+  safeguardingAgreed      Boolean                     @default(false) @map("safeguarding_agreed")
+  safeguardingAgreedDate  DateTime?                   @map("safeguarding_agreed_date") @db.Date
+  status                  MentorProfileStatus
+  approvedBy              String?                     @map("approved_by") @db.Uuid
+  approvedAt              DateTime?                   @map("approved_at") @db.Timestamptz(6)
+  rejectionReason         String?                     @map("rejection_reason") @db.Text
+  createdAt               DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user           User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approver       User? @relation("MentorApprovedBy", fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([backgroundCheckStatus, status])
+  @@index([approvedBy])
+  @@map("mentor_profiles")
+}
+
+model MentorOnboarding {
+  id                        String                @id @default(uuid()) @db.Uuid
+  userId                    String                @unique @map("user_id") @db.Uuid
+  currentStage              MentorOnboardingStage @default(SIGNUP) @map("current_stage")
+  readinessState            MentorReadinessState? @map("readiness_state")
+  canBeApproved             Boolean               @default(false) @map("can_be_approved")
+  canBeMatched              Boolean               @default(false) @map("can_be_matched")
+  readinessBlockers         String[]              @default([]) @map("readiness_blockers")
+  pendingMentorshipCount    Int                   @default(0) @map("pending_mentorship_count")
+  activeMentorshipCount     Int                   @default(0) @map("active_mentorship_count")
+  pausedMentorshipCount     Int                   @default(0) @map("paused_mentorship_count")
+  unresolvedDeclinedConsentCount Int             @default(0) @map("unresolved_declined_consent_count")
+  latestDeclinedConsentAt   DateTime?             @map("latest_declined_consent_at") @db.Timestamptz(6)
+  latestDeclinedConsentTitle String?              @map("latest_declined_consent_title")
+  latestDeclinedConsentReason String?             @map("latest_declined_consent_reason") @db.Text
+  profileCompletionPercentage Int                 @default(0) @map("profile_completion_percentage")
+  emailVerifiedAt           DateTime?             @map("email_verified_at") @db.Timestamptz(6)
+  profileCompletedAt        DateTime?             @map("profile_completed_at") @db.Timestamptz(6)
+  interestsCompletedAt      DateTime?             @map("interests_completed_at") @db.Timestamptz(6)
+  trainingCompletedAt       DateTime?             @map("training_completed_at") @db.Timestamptz(6)
+  consentSignedAt           DateTime?             @map("consent_signed_at") @db.Timestamptz(6)
+  backgroundScreeningStatus String?               @map("background_screening_status")
+  approvedAt                DateTime?             @map("approved_at") @db.Timestamptz(6)
+  rejectedAt                DateTime?             @map("rejected_at") @db.Timestamptz(6)
+  rejectionReason           String?               @map("rejection_reason") @db.Text
+  createdAt                 DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([currentStage])
+  @@index([readinessState])
+  @@map("mentor_onboarding")
+}
+
+model MentorProgramApplication {
+  id                     String                         @id @default(uuid()) @db.Uuid
+  mentorUserId           String                         @map("mentor_user_id") @db.Uuid
+  programId              String                         @map("program_id") @db.Uuid
+  status                 MentorProgramApplicationStatus @default(PENDING)
+  availabilityNotes      String                         @map("availability_notes") @db.Text
+  interestAreas          Json                           @map("interest_areas")
+  commitmentHoursPerMonth Int                           @map("commitment_hours_per_month")
+  applicationNote        String?                        @map("application_note") @db.Text
+  appliedAt              DateTime                       @default(now()) @map("applied_at") @db.Timestamptz(6)
+  reviewedAt             DateTime?                      @map("reviewed_at") @db.Timestamptz(6)
+  reviewedById           String?                        @map("reviewed_by_id") @db.Uuid
+  reviewNotes            String?                        @map("review_notes") @db.Text
+  createdAt              DateTime                       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime                       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mentor     User    @relation("MentorProgramApplications", fields: [mentorUserId], references: [id], onDelete: Cascade)
+  program    Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  reviewedBy User?   @relation("MentorProgramApplicationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@unique([mentorUserId, programId])
+  @@index([status, appliedAt])
+  @@index([programId, status])
+  @@map("mentor_program_applications")
+}
+
+model MenteeProfile {
+  id                        String             @id @default(uuid()) @db.Uuid
+  userId                    String             @unique @map("user_id") @db.Uuid
+  schoolId                  String             @map("school_id") @db.Uuid
+  educationLevel            EducationLevel     @map("education_level")
+  grade                     String?
+  course                    String?
+  enrollmentStatus          EnrollmentStatus   @map("enrollment_status")
+  interests                 Json
+  goals                     Json?
+  specificChallenges        String?            @map("specific_challenges") @db.Text
+  preferredFormat           MentoringFormat    @map("preferred_format")
+  parentGuardianName        String?            @map("parent_guardian_name")
+  parentGuardianContact     String?            @map("parent_guardian_contact")
+  parentGuardianEmail       String?            @map("parent_guardian_email")
+  parentGuardianConsent     Boolean?           @map("parent_guardian_consent")
+  parentGuardianConsentDate DateTime?          @map("parent_guardian_consent_date") @db.Date
+  guardianUserId            String?            @map("guardian_user_id") @db.Uuid
+  emergencyContactName      String             @map("emergency_contact_name")
+  emergencyContactPhone     String             @map("emergency_contact_phone")
+  specialRequirements       String?            @map("special_requirements") @db.Text
+  status                    MenteeProfileStatus
+  intakeStageCached         MenteeIntakeStage  @default(AWAITING_MATCHING) @map("intake_stage_cached")
+  requiresConsentCached     Boolean            @default(false) @map("requires_consent_cached")
+  hasConsentCached          Boolean            @default(false) @map("has_consent_cached")
+  previousMentors           Json?              @map("previous_mentors")
+  createdAt                 DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school       School @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  guardianUser User? @relation("GuardianUser", fields: [guardianUserId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, status])
+  @@index([schoolId, intakeStageCached])
+  @@index([educationLevel])
+  @@index([guardianUserId])
+  @@map("mentee_profiles")
+}
+
+model Program {
+  id                    String   @id @default(uuid()) @db.Uuid
+  schoolId              String?  @map("school_id") @db.Uuid
+  name                  String
+  description           String   @db.Text
+  programType           String   @default("FIXED") @map("program_type")
+  category              String   @default("CAREER") @map("program_category")
+  themes                Json?
+  targetAgeGroups       Json?    @map("target_age_groups")
+  geographicScope       String   @default("SCHOOL") @map("geographic_scope")
+  targetSchoolIds       String[] @default([]) @map("target_school_ids")
+  targetCounties        Json?    @map("target_counties")
+  targetCountries       Json?    @map("target_countries")
+  mentorRequirements    Json?    @map("mentor_requirements")
+  programFormat         String   @default("VIRTUAL") @map("program_format")
+  sessionFrequency      String   @default("MONTHLY") @map("session_frequency")
+  sessionDurationMinutes Int     @default(60) @map("session_duration_minutes")
+  applicationDeadline   DateTime? @map("application_deadline") @db.Timestamptz(6)
+  rollingProgram        Boolean  @default(false) @map("rolling_program")
+  cohortLengthMonths    Int?     @map("cohort_length_months")
+  maxMentors            Int?     @map("max_mentors")
+  maxMentees            Int?     @map("max_mentees")
+  programStatus         String   @default("DRAFT") @map("program_status")
+  durationMonths        Int      @map("duration_months")
+  minSessionsPerMonth   Int      @default(2) @map("min_sessions_per_month")
+  objectives            Json
+  targetEducationLevels Json     @map("target_education_levels")
+  startDate             DateTime @map("start_date") @db.Date
+  endDate               DateTime @map("end_date") @db.Date
+  isActive              Boolean  @default(true) @map("is_active")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  school       School?      @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  mentorships  Mentorship[]
+  mentorProgramApplications MentorProgramApplication[]
+
+  @@index([schoolId, isActive])
+  @@index([programStatus, isActive])
+  @@index([category, programType])
+  @@index([startDate, endDate])
+  @@map("programs")
+}
+
+model Mentorship {
+  id                   String            @id @default(uuid()) @db.Uuid
+  programId            String            @map("program_id") @db.Uuid
+  mentorId             String            @map("mentor_id") @db.Uuid
+  menteeId             String            @map("mentee_id") @db.Uuid
+  status               MentorshipStatus
+  startedAt            DateTime?         @map("started_at") @db.Date
+  scheduledEndDate     DateTime          @map("scheduled_end_date") @db.Date
+  actualEndDate        DateTime?         @map("actual_end_date") @db.Date
+  pauseReason          String?           @map("pause_reason") @db.Text
+  terminationReason    String?           @map("termination_reason") @db.Text
+  terminationNotes     String?           @map("termination_notes") @db.Text
+  outcome              MentorshipOutcome?
+  outcomeNotes         String?           @map("outcome_notes") @db.Text
+  lastSessionDate      DateTime?         @map("last_session_date") @db.Date
+  nextScheduledSession DateTime?         @map("next_scheduled_session") @db.Date
+  checkInFrequency     CheckInFrequency  @map("check_in_frequency")
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  program   Program    @relation(fields: [programId], references: [id], onDelete: Restrict)
+  mentor    User       @relation("MentorshipMentor", fields: [mentorId], references: [id], onDelete: Restrict)
+  mentee    User       @relation("MentorshipMentee", fields: [menteeId], references: [id], onDelete: Restrict)
+  acceptance MentorshipAcceptance?
+  sessions  Session[]
+  goals     Goal[]
+  feedbacks Feedback[]
+
+  @@index([status])
+  @@index([programId, status])
+  @@index([mentorId, status])
+  @@index([menteeId, status])
+  @@index([nextScheduledSession])
+  @@map("mentorships")
+}
+
+model MentorshipAcceptance {
+  id                String    @id @default(uuid()) @db.Uuid
+  mentorshipId      String    @unique @map("mentorship_id") @db.Uuid
+  mentorAccepted    Boolean   @default(false) @map("mentor_accepted")
+  mentorRespondedAt DateTime? @map("mentor_responded_at") @db.Timestamptz(6)
+  menteeAccepted    Boolean   @default(false) @map("mentee_accepted")
+  menteeRespondedAt DateTime? @map("mentee_responded_at") @db.Timestamptz(6)
+  declinedByUserId  String?   @map("declined_by_user_id") @db.Uuid
+  declineCategory   MatchDeclineCategory? @map("decline_category")
+  declineReason     String?   @map("decline_reason") @db.Text
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mentorship    Mentorship @relation(fields: [mentorshipId], references: [id], onDelete: Cascade)
+  declinedByUser User?     @relation("MentorshipDeclinedBy", fields: [declinedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([mentorAccepted, menteeAccepted])
+  @@index([declinedByUserId])
+  @@map("mentorship_acceptances")
+}
+
+model Session {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  mentorshipId       String                  @map("mentorship_id") @db.Uuid
+  scheduledDate      DateTime                @map("scheduled_date") @db.Date
+  actualDate         DateTime?               @map("actual_date") @db.Date
+  durationMinutes    Int                     @map("duration_minutes")
+  format             SessionFormat
+  location           String?
+  meetingLink        String?                 @map("meeting_link")
+  topicsCovered      Json                    @map("topics_covered")
+  sessionNotes       String                  @map("session_notes") @db.Text
+  progressIndicators Json?                   @map("progress_indicators")
+  nextSteps          String?                 @map("next_steps") @db.Text
+  attendanceStatus   SessionAttendanceStatus @map("attendance_status")
+  cancellationReason String?                 @map("cancellation_reason") @db.Text
+  createdBy          String                  @map("created_by") @db.Uuid
+  createdAt          DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mentorship     Mentorship @relation(fields: [mentorshipId], references: [id], onDelete: Cascade)
+  createdByUser  User       @relation("SessionCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([mentorshipId, scheduledDate])
+  @@index([attendanceStatus])
+  @@index([createdBy])
+  @@map("sessions")
+}
+
+model Goal {
+  id                 String     @id @default(uuid()) @db.Uuid
+  mentorshipId       String     @map("mentorship_id") @db.Uuid
+  title              String
+  description        String     @db.Text
+  targetDate         DateTime   @map("target_date") @db.Date
+  status             GoalStatus
+  progressPercentage Int        @default(0) @map("progress_percentage")
+  notes              String?    @db.Text
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mentorship Mentorship @relation(fields: [mentorshipId], references: [id], onDelete: Cascade)
+
+  @@index([mentorshipId, status])
+  @@index([targetDate])
+  @@map("goals")
+}
+
+model Feedback {
+  id                 String       @id @default(uuid()) @db.Uuid
+  mentorshipId       String       @map("mentorship_id") @db.Uuid
+  fromUserId         String       @map("from_user_id") @db.Uuid
+  toUserId           String       @map("to_user_id") @db.Uuid
+  type               FeedbackType
+  rating             Int
+  strengths          String?      @db.Text
+  areasForImprovement String?     @map("areas_for_improvement") @db.Text
+  comments           String?      @db.Text
+  submittedAt        DateTime     @default(now()) @map("submitted_at") @db.Timestamptz(6)
+  isAnonymous        Boolean      @default(false) @map("is_anonymous")
+
+  mentorship Mentorship @relation(fields: [mentorshipId], references: [id], onDelete: Cascade)
+  fromUser   User       @relation("FeedbackFromUser", fields: [fromUserId], references: [id], onDelete: Restrict)
+  toUser     User       @relation("FeedbackToUser", fields: [toUserId], references: [id], onDelete: Restrict)
+
+  @@index([mentorshipId, type])
+  @@index([toUserId])
+  @@index([submittedAt])
+  @@map("feedback")
+}
+
+model GrantFunder {
+  id                     String           @id @default(uuid()) @db.Uuid
+  name                   String           @unique
+  type                   GrantFunderType  @default(OTHER)
+  website                String?
+  country                String?
+  hqCity                 String?          @map("hq_city")
+  focusAreas             Json?            @map("focus_areas")
+  typicalMinAmountMinor  BigInt?          @map("typical_min_amount_minor")
+  typicalMaxAmountMinor  BigInt?          @map("typical_max_amount_minor")
+  currencyCode           String?          @map("currency_code") @db.VarChar(3)
+  applicationUrl         String?          @map("application_url")
+  isActive               Boolean          @default(true) @map("is_active")
+  createdAt              DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  contacts      GrantFunderContact[]
+  opportunities GrantOpportunity[]
+
+  @@index([type, isActive])
+  @@index([country, isActive])
+  @@map("grant_funders")
+}
+
+model GrantFunderContact {
+  id         String   @id @default(uuid()) @db.Uuid
+  funderId   String   @map("funder_id") @db.Uuid
+  name       String
+  email      String?
+  phone      String?
+  role       String?
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  funder GrantFunder @relation(fields: [funderId], references: [id], onDelete: Cascade)
+
+  @@index([funderId, isActive])
+  @@index([email])
+  @@map("grant_funder_contacts")
+}
+
+model GrantSourceSetting {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique
+  label       String
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive, sortOrder])
+  @@map("grant_source_settings")
+}
+
+model GrantCurrencySetting {
+  id         String   @id @default(uuid()) @db.Uuid
+  code       String   @unique @db.VarChar(3)
+  label      String
+  symbol     String?
+  minorUnit  Int      @default(2) @map("minor_unit")
+  isDefault  Boolean  @default(false) @map("is_default")
+  sortOrder  Int      @default(0) @map("sort_order")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive, sortOrder])
+  @@index([isDefault])
+  @@map("grant_currency_settings")
+}
+
+model GrantScoringProfile {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String
+  timelineWeight     Int      @default(20) @map("timeline_weight")
+  amountWeight       Int      @default(20) @map("amount_weight")
+  areaWeight         Int      @default(30) @map("area_weight")
+  eligibilityWeight  Int      @default(20) @map("eligibility_weight")
+  readinessWeight    Int      @default(10) @map("readiness_weight")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive])
+  @@map("grant_scoring_profiles")
+}
+
+model GrantOpportunity {
+  id              String                 @id @default(uuid()) @db.Uuid
+  title           String
+  funderName      String                 @map("funder_name")
+  funderId        String?                @map("funder_id") @db.Uuid
+  description     String?                @db.Text
+  sourceType      GrantSourceType?       @map("source_type")
+  sourceReference String?                @map("source_reference")
+  sourceUrl       String?                @map("source_url")
+  attachmentUrl   String?                @map("attachment_url")
+  attachmentName  String?                @map("attachment_name")
+  attachmentMime  String?                @map("attachment_mime")
+  attachmentSize  Int?                   @map("attachment_size")
+  deadline        DateTime               @db.Timestamptz(6)
+  status          GrantOpportunityStatus @default(DISCOVERED)
+  fitScore        Int?                   @map("fit_score")
+  fitMatrix       Json?                  @map("fit_matrix")
+  scoredById      String?                @map("scored_by_id") @db.Uuid
+  scoredAt        DateTime?              @map("scored_at") @db.Timestamptz(6)
+  country         String?
+  currencyCode    String                 @map("currency_code") @db.VarChar(3)
+  amountMinor     BigInt                 @map("amount_minor")
+  schoolId        String?                @map("school_id") @db.Uuid
+  partnerId       String?                @map("partner_id") @db.Uuid
+  createdById     String                 @map("created_by_id") @db.Uuid
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  school       School?           @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  partner      Partner?          @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  funder       GrantFunder?      @relation(fields: [funderId], references: [id], onDelete: SetNull)
+  createdBy    User              @relation("GrantOpportunityCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  scoredBy     User?             @relation("GrantOpportunityScoredBy", fields: [scoredById], references: [id], onDelete: SetNull)
+  applications GrantApplication[]
+  lots         GrantOpportunityLot[]
+
+  @@index([status, deadline])
+  @@index([schoolId, status])
+  @@index([partnerId, status])
+  @@index([funderId, status])
+  @@index([createdById, createdAt])
+  @@index([scoredById, scoredAt])
+  @@map("grant_opportunities")
+}
+
+model GrantOpportunityLot {
+  id             String   @id @default(uuid()) @db.Uuid
+  opportunityId  String   @map("opportunity_id") @db.Uuid
+  description    String   @db.Text
+  quantity       Int
+  minBudgetMinor BigInt   @map("min_budget_minor")
+  maxBudgetMinor BigInt   @map("max_budget_minor")
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  opportunity GrantOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId, sortOrder])
+  @@map("grant_opportunity_lots")
+}
+
+model GrantApplication {
+  id                  String                @id @default(uuid()) @db.Uuid
+  opportunityId       String                @map("opportunity_id") @db.Uuid
+  title               String
+  stage               GrantApplicationStage @default(DISCOVERY)
+  currencyCode        String                @map("currency_code") @db.VarChar(3)
+  amountRequestedMinor BigInt               @map("amount_requested_minor")
+  schoolId            String?               @map("school_id") @db.Uuid
+  partnerId           String?               @map("partner_id") @db.Uuid
+  createdById         String                @map("created_by_id") @db.Uuid
+  submittedById       String?               @map("submitted_by_id") @db.Uuid
+  submittedAt         DateTime?             @map("submitted_at") @db.Timestamptz(6)
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  opportunity GrantOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Restrict)
+  school      School?          @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  partner     Partner?         @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  createdBy   User             @relation("GrantApplicationCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  submittedBy User?            @relation("GrantApplicationSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  tasks       GrantTask[]
+  approvals   GrantApproval[]
+  submission  GrantSubmission?
+
+  @@index([stage, createdAt])
+  @@index([schoolId, stage])
+  @@index([partnerId, stage])
+  @@index([opportunityId])
+  @@index([createdById])
+  @@map("grant_applications")
+}
+
+model GrantTask {
+  id               String          @id @default(uuid()) @db.Uuid
+  applicationId    String          @map("application_id") @db.Uuid
+  title            String
+  description      String?         @db.Text
+  section          String?
+  assigneeId       String?         @map("assignee_id") @db.Uuid
+  status           GrantTaskStatus @default(TODO)
+  reviewStatus     GrantTaskReviewStatus? @map("review_status")
+  reviewedById     String?         @map("reviewed_by_id") @db.Uuid
+  reviewedAt       DateTime?       @map("reviewed_at") @db.Timestamptz(6)
+  reviewNotes      String?         @map("review_notes") @db.Text
+  evidenceUrl      String?         @map("evidence_url")
+  evidenceName     String?         @map("evidence_name")
+  evidenceMime     String?         @map("evidence_mime")
+  evidenceSize     Int?            @map("evidence_size")
+  dueDate          DateTime?       @map("due_date") @db.Date
+  completedAt      DateTime?       @map("completed_at") @db.Timestamptz(6)
+  completionNotes  String?         @map("completion_notes") @db.Text
+  sortOrder        Int             @default(0) @map("sort_order")
+  createdById      String          @map("created_by_id") @db.Uuid
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  application GrantApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  assignee    User?            @relation("GrantTaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy   User             @relation("GrantTaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  reviewedBy  User?            @relation("GrantTaskReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, status])
+  @@index([reviewStatus, reviewedAt])
+  @@index([assigneeId, status])
+  @@index([reviewedById])
+  @@index([dueDate])
+  @@map("grant_tasks")
+}
+
+model GrantApproval {
+  id            String             @id @default(uuid()) @db.Uuid
+  applicationId String             @map("application_id") @db.Uuid
+  approvalType  GrantApprovalType  @map("approval_type")
+  status        GrantApprovalStatus @default(PENDING)
+  requestedById String             @map("requested_by_id") @db.Uuid
+  requestedAt   DateTime           @default(now()) @map("requested_at") @db.Timestamptz(6)
+  resolvedById  String?            @map("resolved_by_id") @db.Uuid
+  resolvedAt    DateTime?          @map("resolved_at") @db.Timestamptz(6)
+  notes         String?            @db.Text
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  application GrantApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  requestedBy User             @relation("GrantApprovalRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  resolvedBy  User?            @relation("GrantApprovalResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@unique([applicationId, approvalType])
+  @@index([status, approvalType])
+  @@index([requestedById, requestedAt])
+  @@index([resolvedById, resolvedAt])
+  @@map("grant_approvals")
+}
+
+model GrantSubmission {
+  id                     String    @id @default(uuid()) @db.Uuid
+  applicationId          String    @unique @map("application_id") @db.Uuid
+  submittedById          String    @map("submitted_by_id") @db.Uuid
+  submittedAt            DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(6)
+  confirmationReference  String?   @map("confirmation_reference")
+  proofUrl               String?   @map("proof_url")
+  packageVersion         String?   @map("package_version")
+  notes                  String?   @db.Text
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  application GrantApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  submittedBy User             @relation("GrantSubmissionSubmittedBy", fields: [submittedById], references: [id], onDelete: Restrict)
+
+  @@index([submittedById, submittedAt])
+  @@map("grant_submissions")
+}
+
+model Consent {
+  id           String      @id @default(uuid()) @db.Uuid
+  userId       String      @map("user_id") @db.Uuid
+  consentType  ConsentType @map("consent_type")
+  version      String
+  agreedAt     DateTime    @default(now()) @map("agreed_at") @db.Timestamptz(6)
+  agreedByIp   String      @map("agreed_by_ip")
+  documentUrl  String      @map("document_url")
+  evidenceUrl  String?     @map("evidence_url")
+  expiresAt    DateTime?   @map("expires_at") @db.Date
+  revokedAt    DateTime?   @map("revoked_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, consentType, agreedAt])
+  @@index([expiresAt, revokedAt])
+  @@map("consents")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id") @db.Uuid
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String   @map("ip_address")
+  userAgent  String   @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}

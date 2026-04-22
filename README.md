@@ -20,6 +20,38 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## SMTP Email Setup (ZeptoMail)
+
+The app sends tenant invite emails from `POST /api/protected/settings/users` and re-invite from `POST /api/protected/settings/users/:userId/reinvite`.
+
+Preferred setup (ZeptoMail REST API) in your local `.env`:
+
+```bash
+ZEPTO_URL=https://api.zeptomail.com/v1.1/email
+ZEPTO_TOKEN="Zoho-enczapikey <your-token>"
+ZEPTO_FROM_ADDRESS=noreply@waziflow.com
+ZEPTO_FROM_NAME=Cacumator
+```
+
+Optional SMTP fallback:
+
+```bash
+SMTP_HOST=smtp.zeptomail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=emailapikey
+SMTP_PASS=<your-smtp-password>
+SMTP_FROM="Cacumator <no-reply@waziflow.com>"
+```
+
+Recommended test action:
+
+1. Sign in as `PLATFORM_ADMIN`.
+2. Go to `Settings -> Users`.
+3. Click `Add User` and submit.
+4. Confirm toast shows `Invite Sent` (instead of `Invite Link Copied`).
+5. Check recipient inbox for the invite email.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

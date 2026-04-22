@@ -1,26 +1,394 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "flatpickr/dist/flatpickr.min.css";
+@import "tom-select/dist/css/tom-select.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-plex-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root,
+[data-theme="sunrise"] {
+  --bg: #fef7ef;
+  --surface: #fffdf8;
+  --surface-2: #f4ece1;
+  --text: #1f1a17;
+  --muted: #78695f;
+  --border: #e4d7c8;
+  --primary: #ec6f1d;
+  --primary-contrast: #fff9f3;
+  --danger: #b42318;
+  --ring: #ffab6b;
+}
+
+[data-theme="ocean"] {
+  --bg: #eef8f9;
+  --surface: #faffff;
+  --surface-2: #deeff0;
+  --text: #132023;
+  --muted: #4a6570;
+  --border: #c7dde1;
+  --primary: #0f766e;
+  --primary-contrast: #ecfefc;
+  --danger: #b42318;
+  --ring: #2dd4bf;
+}
+
+[data-theme="forest"] {
+  --bg: #f1f6ec;
+  --surface: #fcfffa;
+  --surface-2: #e3eddb;
+  --text: #1a2416;
+  --muted: #5b6f52;
+  --border: #ceddc3;
+  --primary: #2f6b2d;
+  --primary-contrast: #f3fff2;
+  --danger: #9f1239;
+  --ring: #65a30d;
+}
+
+[data-theme="graphite"] {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #e9eaee;
+  --text: #1b1f2a;
+  --muted: #5f6473;
+  --border: #d7dae2;
+  --primary: #374151;
+  --primary-contrast: #f3f4f6;
+  --danger: #b91c1c;
+  --ring: #9ca3af;
+}
+
+[data-theme="cacumator"] {
+  --bg: #ece8f0;
+  --surface: #f6f3f8;
+  --surface-2: #e7e1ee;
+  --text: #1e2739;
+  --muted: #68748f;
+  --border: #cfc7db;
+  --primary: #8f43c9;
+  --primary-contrast: #ffffff;
+  --danger: #c81e1e;
+  --ring: #b264df;
+  --primary-deep: #4b2088;
+  --accent: #c447af;
+  --cta-dark: #081735;
+  --hero-start: #4c1f87;
+  --hero-mid: #7a3eb6;
+  --hero-end: #c449b0;
+}
+
+[data-theme="databricks"] {
+  --bg: #f5f1e8;          /* Oat Light */
+  --surface: #ffffff;     /* White */
+  --surface-2: #e4dbcc;   /* Oat Medium */
+  --text: #0f1f44;        /* Navy 900 */
+  --muted: #4a5a80;
+  --border: #d7cebf;
+  --primary: #ff3621;     /* Lava 600 */
+  --primary-contrast: #ffffff;
+  --danger: #cf2b19;
+  --ring: #ff6a57;
+}
+
+* {
+  border-color: var(--border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 35%),
+    radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--primary) 7%, transparent), transparent 30%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.cacumator-auth-shell {
+  background:
+    radial-gradient(circle at 16% 24%, color-mix(in srgb, white 14%, transparent), transparent 24%),
+    linear-gradient(180deg, #efebf2 0%, #e9e4ee 100%);
+}
+
+.cacumator-auth-hero {
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, white 10%, transparent), transparent 22%),
+    linear-gradient(180deg, var(--hero-start) 0%, var(--hero-mid) 56%, var(--hero-end) 100%);
+}
+
+.cacumator-auth-panel {
+  background: color-mix(in srgb, white 70%, var(--surface));
+  box-shadow: 0 24px 64px rgba(36, 27, 59, 0.08);
+}
+
+.cacumator-auth-pill {
+  background: color-mix(in srgb, white 58%, var(--surface-2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.cacumator-auth-cta {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.cacumator-auth-dark-btn {
+  background: var(--cta-dark);
+  box-shadow: 0 10px 22px rgba(8, 23, 53, 0.2);
+}
+
+.ts-wrapper {
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.ts-wrapper.single .ts-control {
+  min-height: 2.75rem;
+}
+
+.ts-control {
+  border-color: var(--border) !important;
+  border-radius: 1rem !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 96%, white),
+    var(--surface)
+  ) !important;
+  min-height: 2.75rem !important;
+  padding: 0.375rem 0.875rem !important;
+  box-shadow: 0 1px 2px color-mix(in oklab, black 6%, transparent) !important;
+  color: var(--text) !important;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease,
+    transform 160ms ease !important;
+}
+
+.ts-control input {
+  color: var(--text) !important;
+  font-size: 0.875rem !important;
+}
+
+.ts-control .item {
+  color: var(--text) !important;
+}
+
+.ts-wrapper.multi .ts-control {
+  align-items: center;
+  gap: 0.35rem;
+  padding-block: 0.45rem !important;
+}
+
+.ts-wrapper.multi .ts-control > div {
+  border-radius: 999px !important;
+  background: color-mix(in oklab, var(--primary) 14%, var(--surface)) !important;
+  border: 1px solid color-mix(in oklab, var(--primary) 18%, var(--border)) !important;
+  color: var(--primary) !important;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem !important;
+  margin: 0 !important;
+}
+
+.ts-wrapper.plugin-remove_button .item .remove {
+  border-left: 0 !important;
+  color: color-mix(in oklab, var(--primary) 72%, black) !important;
+  padding-left: 0.35rem !important;
+}
+
+.ts-wrapper.plugin-remove_button .item .remove:hover {
+  background: transparent !important;
+  color: var(--danger) !important;
+}
+
+.ts-control .item.active {
+  background: color-mix(in oklab, var(--primary) 16%, var(--surface)) !important;
+}
+
+.ts-control > input::placeholder {
+  color: var(--muted) !important;
+}
+
+.ts-wrapper.focus .ts-control {
+  border-color: var(--ring) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--ring) 22%, transparent),
+    0 10px 30px color-mix(in oklab, var(--primary) 12%, transparent) !important;
+}
+
+.ts-dropdown {
+  border-color: var(--border) !important;
+  border-radius: 1rem !important;
+  background: color-mix(in oklab, var(--surface) 98%, white) !important;
+  color: var(--text) !important;
+  box-shadow: 0 22px 44px color-mix(in oklab, black 10%, transparent) !important;
+  overflow: hidden;
+  margin-top: 0.45rem !important;
+}
+
+.ts-dropdown [data-selectable] {
+  color: var(--text) !important;
+  padding: 0.75rem 0.9rem !important;
+  font-size: 0.875rem;
+}
+
+.ts-dropdown .active {
+  background: color-mix(in oklab, var(--primary) 18%, var(--surface)) !important;
+}
+
+.ts-dropdown .create,
+.ts-dropdown .no-results,
+.ts-dropdown .optgroup-header {
+  padding: 0.75rem 0.9rem !important;
+  color: var(--muted) !important;
+  font-size: 0.8125rem;
+}
+
+.ts-wrapper.ts-appearance-bounded .ts-control {
+  background: var(--surface) !important;
+  border-width: 1px !important;
+  box-shadow: none !important;
+}
+
+.ts-wrapper.ts-appearance-bounded .ts-control:hover {
+  border-color: color-mix(in oklab, var(--primary) 30%, var(--border)) !important;
+}
+
+.ts-wrapper.ts-appearance-bounded.multi .ts-control > div {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  font-weight: 500;
+}
+
+.ts-wrapper.ts-appearance-bounded.plugin-remove_button .item .remove {
+  color: var(--muted) !important;
+}
+
+.ts-wrapper.ts-appearance-bounded.focus .ts-control {
+  border-color: var(--ring) !important;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 18%, transparent) !important;
+}
+
+.ts-dropdown.ts-appearance-bounded {
+  box-shadow: 0 14px 30px color-mix(in oklab, black 8%, transparent) !important;
+}
+
+@keyframes programs-card-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes programs-card-halo {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.34;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.62;
+  }
+}
+
+.program-card-icon-orb {
+  position: relative;
+  overflow: hidden;
+}
+
+.program-card-icon-orb::before {
+  content: "";
+  position: absolute;
+  inset: -16%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in oklab, var(--primary) 26%, white), transparent 60%),
+    radial-gradient(circle at 72% 72%, color-mix(in oklab, var(--primary) 16%, white), transparent 62%);
+  animation: programs-card-halo 2.8s ease-in-out infinite;
+}
+
+.program-card-icon-float {
+  animation: programs-card-float 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .program-card-icon-float,
+  .program-card-icon-orb::before {
+    animation: none !important;
+  }
+}
+
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.rich-document {
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.rich-document h1,
+.rich-document h2,
+.rich-document h3,
+.rich-document h4 {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.rich-document h1 {
+  font-size: 1.5rem;
+}
+
+.rich-document h2 {
+  font-size: 1.25rem;
+}
+
+.rich-document h3 {
+  font-size: 1.05rem;
+}
+
+.rich-document p,
+.rich-document ul,
+.rich-document ol,
+.rich-document blockquote {
+  margin: 0 0 1rem;
+}
+
+.rich-document ul,
+.rich-document ol {
+  padding-left: 1.25rem;
+}
+
+.rich-document li + li {
+  margin-top: 0.35rem;
+}
+
+.rich-document a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.rich-document img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+}
+
+.rich-document blockquote {
+  border-left: 3px solid color-mix(in oklab, var(--primary) 40%, white);
+  padding-left: 1rem;
+  color: var(--muted);
 }
